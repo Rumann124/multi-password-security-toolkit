@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Security Suite</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #e0e0e0;
+            --danger: #ff4444;
+            --warning: #ffbb33;
+            --crack-color: #d63384; /* Magenta for crack time */
+        }
+
+        body {
+            font-family: 'Segoe UI', monospace;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 0 0 30px 0;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- MAIN ANALYZER CARD --- */
+        .main-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            max-width: 900px; /* Slightly wider for 3 columns */
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        input[type="password"], input[type="text"] {
+            width: 100%;
+            padding: 20px;
+            background: #111;
+            border: 2px solid #333;
+            color: white;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        .toggle-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #666;
+            background: none;
+            border: none;
+        }
+
+        /* --- 3 COLUMN GRID LAYOUT --- */
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* Three equal columns */
+            gap: 15px;
+            opacity: 0.3; /* Dimmed until typing */
+            transition: opacity 0.3s;
+        }
+
+        /* Responsive: Stack on mobile */
+        @media (max-width: 600px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-panel {
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100px;
+        }
+
+        .panel-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .status-big { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
+        .status-desc { font-size: 0.85rem; color: #aaa; }
+        
+        .crack-text { color: var(--crack-color); }
+
+        /* Strength Meter */
+        .meter-bar {
+            height: 4px;
+            background: #333;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .meter-fill { height: 100%; width: 0%; transition: width 0.3s, background 0.3s; }
+
+        /* --- GENERATOR SECTION --- */
+        .generator-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #333;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gen-header {
+            width: 100%;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gen-controls {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #111;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        button.gen-btn {
+            background: var(--primary);
+            color: black;
+            font-weight: bold;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.1s;
+        }
+        button.gen-btn:active { transform: scale(0.98); }
+
+        .gen-result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #000;
+            border: 1px dashed #444;
+            width: 90%;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #888;
+            cursor: pointer;
+            word-break: break-all;
+        }
+        .gen-result:hover { border-color: var(--primary); color: white; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Multi-Platform Password <br>Security Toolkit <span style="font-size:0.5em; vertical-align:middle; color:#666;">v3.0</span></h1>
+
+    <div class="main-card">
+       <div class="gen-header">
+    <span>🔑</span> 1. ANALYZE & CHECK BREACHES
+</div>
+        
+        <div class="input-wrapper">
+            <input type="password" id="passInput" placeholder="Type password here..." onkeyup="handleInput()">
+            <button class="toggle-btn" onclick="toggleVis()">👀</button>
+        </div>
+
+        <div class="results-container" id="resultsArea">
+            
+            <div class="result-panel">
+                <div class="panel-title">Strength</div>
+                <div id="strengthLabel" class="status-big" style="color:#666">---</div>
+                <div id="entropyLabel" class="status-desc">0 bits entropy</div>
+                <div class="meter-bar"><div id="strengthFill" class="meter-fill"></div></div>
+            </div>
+
+            <div class="result-panel">
+                <div class="panel-title">Time to Crack</div>
+                <div id="crackTimeLabel" class="status-big crack-text">---</div>
+                <div class="status-desc">GPU Brute Force</div>
+            </div>
+
+            <div class="result-panel">
+                <div class="panel-title">Breach Status</div>
+                <div id="breachLabel" class="status-big" style="color:#666">WAITING...</div>
+                <div id="breachDesc" class="status-desc">Type to scan</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="generator-card">
+        <div class="gen-header">
+            <span>🎲</span> 2. PASSWORD GENERATOR
+        </div>
+
+        <div class="gen-controls">
+            <div class="control-group">
+                <label>Length:</label>
+                <input type="number" id="genLength" value="16" min="8" max="64" style="width:60px; padding:5px; font-size:1rem; text-align:center;">
+            </div>
+            <div class="control-group">
+                <label><input type="checkbox" id="useSym" checked> Symbols</label>
+            </div>
+            <div class="control-group">
+                <label><input type="checkbox" id="useNum" checked> Numbers</label>
+            </div>
+        </div>
+
+        <button class="gen-btn" onclick="generateNew()">GENERATE NEW PASSWORD</button>
+        
+        <div class="gen-result" id="genOutput" onclick="copyGen()">
+            CLICK GENERATE
+        </div>
+        <div style="font-size:0.8em; color:#666; margin-top:5px;">(Click box to copy)</div>
+    </div>
+
+    <script>
+        let typingTimer;
+        const doneTypingInterval = 800; // Wait 0.8s before hitting the server
+
+        function toggleVis() {
+            const input = document.getElementById('passInput');
+            input.type = input.type === "password" ? "text" : "password";
+        }
+
+        function handleInput() {
+            const val = document.getElementById('passInput').value;
+            const results = document.getElementById('resultsArea');
+            
+            if(val.length > 0) {
+                results.style.opacity = "1";
+            } else {
+                results.style.opacity = "0.3";
+                document.getElementById('strengthLabel').innerText = "---";
+                document.getElementById('strengthFill').style.width = "0%";
+                document.getElementById('crackTimeLabel').innerText = "---";
+                document.getElementById('breachLabel').innerText = "WAITING...";
+                document.getElementById('breachLabel').style.color = "#666";
+                return;
+            }
+
+            // Set UI to loading state
+            document.getElementById('breachLabel').innerText = "SCANNING...";
+            document.getElementById('breachLabel').style.color = "var(--warning)";
+            document.getElementById('strengthLabel').innerText = "...";
+            document.getElementById('crackTimeLabel').innerText = "...";
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => fetchAnalysis(val), doneTypingInterval);
+        }
+
+        // --- CONNECT TO PYTHON SERVER ---
+        async function fetchAnalysis(password) {
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const data = await response.json();
+                updateUI(data);
+            } catch (error) {
+                console.error('Error connecting to server:', error);
+                document.getElementById('breachDesc').innerText = "Server Offline (Run app.py)";
+            }
+        }
+
+        function updateUI(data) {
+            // 1. Update Strength
+            const fill = document.getElementById('strengthFill');
+            const label = document.getElementById('strengthLabel');
+            const entropyLabel = document.getElementById('entropyLabel');
+
+            const percentage = Math.min(data.entropy, 100);
+            fill.style.width = percentage + "%";
+            
+            label.innerText = data.strength_label;
+            entropyLabel.innerText = data.entropy + " bits entropy";
+
+            if (data.strength_label === "WEAK") {
+                fill.style.background = "var(--danger)";
+                label.style.color = "var(--danger)";
+            } else if (data.strength_label === "DECENT") {
+                fill.style.background = "var(--warning)";
+                label.style.color = "var(--warning)";
+            } else {
+                fill.style.background = "var(--primary)";
+                label.style.color = "var(--primary)";
+            }
+
+            // 2. Update Time to Crack (NEW)
+            const crackLabel = document.getElementById('crackTimeLabel');
+            // If the python backend hasn't been updated yet, handle gracefully
+            crackLabel.innerText = data.crack_time_display || "Update app.py";
+
+            // 3. Update Breach Status
+            const breachLabel = document.getElementById('breachLabel');
+            const breachDesc = document.getElementById('breachDesc');
+
+            if (data.breach_found) {
+                breachLabel.innerText = "BREACHED";
+                breachLabel.style.color = "var(--danger)";
+                breachDesc.innerText = `Found ${data.breach_count} times!`;
+            } else {
+                breachLabel.innerText = "SAFE";
+                breachLabel.style.color = "var(--primary)";
+                breachDesc.innerText = "No leaks found (Pwned API).";
+            }
+        }
+
+        // --- CONNECT GENERATOR TO PYTHON ---
+        async function generateNew() {
+            const len = document.getElementById('genLength').value;
+            const useSym = document.getElementById('useSym').checked;
+            const useNum = document.getElementById('useNum').checked;
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        length: len, 
+                        symbols: useSym, 
+                        numbers: useNum 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                const out = document.getElementById('genOutput');
+                out.innerText = data.password;
+                out.style.color = "white";
+                out.style.borderColor = "var(--primary)";
+                
+            } catch (error) {
+                console.error("Generator Error:", error);
+                document.getElementById('genOutput').innerText = "Server Error";
+            }
+        }
+
+        function copyGen() {
+            const text = document.getElementById('genOutput').innerText;
+            if(text.includes("CLICK") || text.includes("Error")) return;
+            navigator.clipboard.writeText(text);
+            alert("Copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
